@@ -1,0 +1,17 @@
+{
+    "files.associations": {
+        "bit": "cpp",
+        "*.tcc": "cpp",
+        "compare": "cpp",
+        "cstddef": "cpp",
+        "string": "cpp",
+        "vector": "cpp",
+        "algorithm": "cpp",
+        "memory_resource": "cpp",
+        "type_traits": "cpp",
+        "initializer_list": "cpp",
+        "new": "cpp",
+        "concepts": "cpp",
+        "tuple": "cpp"
+    }
+}
