@@ -3,12 +3,17 @@
 #include <iostream>
 #include <sstream>
 #include <unordered_map>
+#include <map>
+#include <algorithm>
 
 // Define a structure for a table
 struct Table
 {
     std::vector<std::string> columns;
     std::vector<std::vector<std::string>> records;
+
+    // New index map
+    std::unordered_map<std::string, std::map<std::string, int>> indexes;
 };
 
 // Global map to store tables
@@ -89,10 +94,60 @@ void Database::createTable(const std::string& table_name, const std::vector<std:
 
 // Insert a record into a table
 void Database::insertRecord(const std::string& table_name, const std::vector<std::string>& values) {
-    tables[table_name].records.push_back(values);
+    auto& table = tables[table_name];
+    table.records.push_back(values);
+
+    for (const auto& [column_name, index] : table.indexes) {
+        auto col_it = std::find(table.columns.begin(), table.columns.end(), column_name);
+        int col_index = std::distance(table.columns.begin(), col_it);
+        table.indexes[column_name][values[col_index]] = table.records.size() - 1;
+    }
 }
+
 
 // Query the contents of a table
 std::vector<std::vector<std::string>> Database::queryTable(const std::string& table_name) {
     return tables[table_name].records;
+}
+
+std::vector<std::vector<std::string>> Database::queryTable(const std::string& table_name, const std::string& column_name, const std::string& value) {
+    auto& table = tables[table_name];
+    if (table.indexes.find(column_name) != table.indexes.end()) {
+        auto it = table.indexes[column_name].find(value);
+        if (it != table.indexes[column_name].end()) {
+            return { table.records[it->second] };
+        }
+    }
+
+    // If index is not found or value is not indexed, perform a full scan
+    std::vector<std::vector<std::string>> results;
+    for (const auto& record : table.records) {
+        auto col_it = std::find(table.columns.begin(), table.columns.end(), column_name);
+        int col_index = std::distance(table.columns.begin(), col_it);
+        if (record[col_index] == value) {
+            results.push_back(record);
+        }
+    }
+
+    return results;
+}
+
+
+// Create Index
+void Database::createIndex(const std::string& table_name, const std::string& column_name) {
+    auto& table = tables[table_name];
+    auto col_it = std::find(table.columns.begin(), table.columns.end(), column_name);
+    if (col_it == table.columns.end()) {
+        std::cerr << "Column " << column_name << " does not exist in table " << table_name << std::endl;
+        return;
+    }
+
+    int col_index = std::distance(table.columns.begin(), col_it);
+    std::map<std::string, int> index;
+
+    for (size_t i = 0; i < table.records.size(); ++i) {
+        index[table.records[i][col_index]] = i;
+    }
+
+    table.indexes[column_name] = index;
 }

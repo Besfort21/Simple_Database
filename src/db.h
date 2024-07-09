@@ -18,6 +18,11 @@ class Database {
         void insertRecord(const std::string& table_name, const std::vector<std::string>& values);
         std::vector<std::vector<std::string>> queryTable(const std::string& table_name);
 
+        std::vector<std::vector<std::string>> queryTable(const std::string &table_name, const std::string &column_name, const std::string &value);
+
+        //New method for creating an index
+        void createIndex(const std::string& table_name, const std::string& column_name);
+
     private:
 
         //Private members

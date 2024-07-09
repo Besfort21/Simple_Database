@@ -12,9 +12,13 @@ int main() {
     // Insert records
     db.insertRecord("users", {"1", "Alice", "alice@example.com"});
     db.insertRecord("users", {"2", "Bob", "bob@example.com"});
+    db.insertRecord("users", {"3", "Charlie", "charlie@example.com"});
 
-    // Query the table
-    std::vector<std::vector<std::string>> results = db.queryTable("users");
+    // Create an index on the "name" column
+    db.createIndex("users", "name");
+
+    // Query the table using the index
+    std::vector<std::vector<std::string>> results = db.queryTable("users", "name", "Bob");
 
     // Display the results
     for (const auto& row : results) {
